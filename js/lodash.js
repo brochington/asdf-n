@@ -1,3 +1,4 @@
+console.log('lodash is here');
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) lodash.com/license | Underscore.js 1.5.2 underscorejs.org/LICENSE
