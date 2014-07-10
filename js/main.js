@@ -22,19 +22,23 @@ require([
 	// test 2
 
 	// console.log('test 2: ', a.mySecondVar);
-	console.log('test 2:', a.mySecondVar());
+	// console.log('test 2:', a.mySecondVar());
 
-	a.myFirstVar = 'update in test 2';
+	// a.myFirstVar = 'update in test 2';
 
-	// console.log('test 2:', a.mySecondVar);
-	console.log('test 2:', a.mySecondVar());
+	// console.log('test 2:', a.mySecondVar());
 
-	a.mySecondVar = a.myFirstVar;
+	// a.mySecondVar = a.myFirstVar;
 
-	a.myFirstVar = 'update in test again';
+	// a.myFirstVar = 'update in test again';
 
-	// console.log('test 2:', a.mySecondVar);
-	console.log('test 2:', a.mySecondVar());
+	// console.log('test 2:', a.mySecondVar());
+
+	// test 3
+
+	a.newLiveVar('testFunction', function(){
+
+	});
 
 
 

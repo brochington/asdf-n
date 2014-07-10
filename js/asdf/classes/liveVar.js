@@ -33,10 +33,29 @@ define([
 		// liveVar class 
 		function LiveVar(data) {
 			var self = this,
-				liveVarFunc = createLiveVarFunction(data, self);
+				liveVarFunc = createLiveVarFunction(data, self),
+				dataValType = determineType(data.value);
 
+			if(dataValType == 'String' || dataValType == 'Number' || dataValType == 'Boolean'){
+				liveVarFunc.asdfType = 'asdfPrimitive';				
+			};
+
+			if(dataValType == 'Function'){
+				console.log('dataValType is Function.');
 				liveVarFunc.asdfType = 'asdfFunction';
-				liveVarFunc.asdfHome = self;
+			};
+
+			if(dataValType == 'Array'){
+				console.log('dataValType is Array');
+				liveVarFunc.asdfType = 'asdfArray';
+			};
+
+			if(dataValType == 'Object'){
+				console.log('dataValType is Object');
+				liveVarFunc.asdfType = 'asdfObject';
+			};
+
+			liveVarFunc.asdfHome = self;	
 
 			this.internal = {
 				name: data.name,
@@ -65,13 +84,17 @@ define([
 
 					// handle type usecases here. 
 
-					if(valType == 'asdfFunction'){
+					if(valType == 'asdfPrimitive'){
 
 						self.internal.value = val.asdfHome.internal.value;
 						
 						ps.subscribe(val.asdfHome.internal.name, self.updateLiveVars.bind(self));
 
 						return;
+					};
+
+					if(valType == 'asdfFunction'){
+						console.log('val is asdf function');
 					};
 
 					if(valType == 'String' || valType == 'Number' || valType == 'Boolean'){
