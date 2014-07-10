@@ -1,16 +1,16 @@
 define([
 	'asdf/classes/pubsub',
 	'asdf/classes/dom',
+	'asdf/classes/liveVar',
 	'lodash'
-	], function (ps, _){
+	], function (ps, dom, LiveVar, _){
 	// Main define function of asdf
 
-	var asdf = { test: 'property', lodash: _};
+	var asdf = {};
 
-	ps.subscribe('hello', function(){
-		console.log('hello from pubsub');
-	});
-
+	asdf.LiveVar = LiveVar;
+	asdf.Dom = dom;
+	asdf.ps = ps;
 
 	return asdf;
-})
+});

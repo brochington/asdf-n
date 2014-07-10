@@ -1,7 +1,6 @@
 // Why choose pubsub over event emitters? Can I use Object.observe?
 
-define(['lodash'], function (_){
-	console.log('pubsub is loaded!');
+define(['lodash'], function (_){	
 	var ns = {},
 		topics = {},
 		uid = 0;
@@ -12,16 +11,17 @@ define(['lodash'], function (_){
 		if(callback){ callback(); };
 	};
 
-	ns.publish = function(topicName){
-		console.log('publish!')
+	ns.publish = function(topicName, passedValue){
+		console.log('publish!', topicName);
 		var subscribers = topics[topicName];
 
 		// which is faster here? for loop, forEach, or lodash .each?
 		// test using console timer. 
-		topics[topicName].forEach(function (v, i, arr){
-			subscribers[i].functionToCall();
-		});
-
+		if(topics[topicName]){
+			topics[topicName].forEach(function (v, i, arr){
+				subscribers[i].functionToCall(passedValue);
+			});
+		}
 	};
 
 	ns.subscribe = function(topicName, functionToCall){
