@@ -6,6 +6,8 @@ define([
 
 		var ns = {},
 			liveVarValues = {},
+			monitorLiveVars = false,
+			liveVarMonitorArr = [],
 			typeArr = ['Undefined','String','Number','Boolean','Function',
 						'Array','Date','Null','Object','Null','NaN'];
 
@@ -54,6 +56,10 @@ define([
 			Object.defineProperty(this, 'value', {
 				get: function(){
 					// console.log('value get');
+					if(monitorLiveVars){
+						liveVarMonitorArr.push(self);	
+					}
+
 					return self.internal.internalFunc;
 				},
 				set: function(val){
@@ -114,6 +120,11 @@ define([
 			if(dataValType == 'Function'){
 				console.log('dataValType is Function.');
 				tempFunc.asdfType = 'asdfFunction';
+
+				monitorLiveVars = true;
+				//evaluate function with default value to determine init stat.
+				// subscribe to all liveVars that are triggered while running the function
+				monitorLiveVars = false;
 			};
 
 			if(dataValType == 'Array'){
