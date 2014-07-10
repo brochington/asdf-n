@@ -12,12 +12,15 @@ define([
 						'Array','Date','Null','Object','Null','NaN'];
 
 		// Creates a new liveVar property and variable. 
-		ns.newLiveVar = function(Varname, initValue){
+		ns.newLiveVar = function(Varname, initValue, initArgVals){
+
+
 
 			Object.defineProperty(liveVarValues, Varname, {
 				value: new LiveVar({
 					name: Varname,
-					value: initValue
+					value: initValue,
+					initArgVals: determineArgVals(arguments, 2)
 				})
 			});
 
@@ -35,40 +38,48 @@ define([
 		// liveVar class 
 		function LiveVar(data) {
 			var self = this,
-				liveVarFunc = createLiveVarFunction(data, self);
+				liveVarFunc;
 
 			this.internal = {
 				name: data.name,
-				internalFunc: liveVarFunc,
-				value: data.value
+				value: data.value,
+				initArgVals: data.initArgVals,
+				internalFunc: null
 			};
+
+			this.internal.internalFunc = this.createLiveVarFunction();
 
 			Object.defineProperty(this, 'name', {
 				get: function(){
 					// return this.internal.name;
-					console.log('LiveVar name', this);
+					// console.log('LiveVar name', this);
 				},
 				set: function(val){
-					console.log('name set');
+					// console.log('name set');
 				}
 			});
 
 			Object.defineProperty(this, 'value', {
 				get: function(){
-					// console.log('value get');
+					// console.log('get value');
+					
+					// if monitorLiveVar flag is set, add ref to that liveVar in arr.
 					if(monitorLiveVars){
+						// console.log('liveVar in Function...', self);
 						liveVarMonitorArr.push(self);	
-					}
+					};
 
 					return self.internal.internalFunc;
 				},
 				set: function(val){
+					// console.log('set value:', val);
 					var valType = determineType(val);
 					// console.log('valType: ', valType);
 
 					// handle type usecases here. 
 
 					if(valType == 'asdfPrimitive'){
+						console.dir(val);
 
 						self.internal.value = val.asdfHome.internal.value;
 						
@@ -78,11 +89,11 @@ define([
 					};
 
 					if(valType == 'asdfFunction'){
-						console.log('val is asdf function');
+						// console.log('val is asdf function');
 					};
 
 					if(valType == 'String' || valType == 'Number' || valType == 'Boolean'){
-						console.log('type1', self.internal.name);
+						// console.log('type1', self.internal.name, val);
 
 						self.internal.value = val;
 
@@ -95,16 +106,20 @@ define([
 		};
 
 		LiveVar.prototype.updateLiveVars = function(passedValue){
-			console.log('proto updateLiveVars');
-			console.log(this);
-			console.log(passedValue);
+			// console.log('proto updateLiveVars');
+			// console.log(this);
+			// console.log(passedValue);
 
 			this.internal.value = passedValue;
 		};
 
-		function createLiveVarFunction(data, self){
+		LiveVar.prototype.createLiveVarFunction = function (){
+			// console.log('testing createLiveVarFunction', this);
+
 			var tempFunc = new Function(),
-				dataValType = determineType(data.value);
+				self = this,
+				tempVal = null,
+				dataValType = determineType(this.internal.value);
 
 			// this is the magic function!
 			tempFunc = function(){
@@ -114,35 +129,61 @@ define([
 
 			//setup the properties on the function that will be passed around.
 			if(dataValType == 'String' || dataValType == 'Number' || dataValType == 'Boolean'){
+				// console.log('is a primative...');
 				tempFunc.asdfType = 'asdfPrimitive';				
 			};
 
+			// If value is a function, 
 			if(dataValType == 'Function'){
 				console.log('dataValType is Function.');
 				tempFunc.asdfType = 'asdfFunction';
 
+				// move function the internalFunc property so that value can be the evaluated value of
+				// the function.
+				
+				this.internal.internalFunc = this.internal.value;
+				// evaluate function with default value to determine init value and 
+				// see if any liveVars are being used inside of the function. subscribe to them is so.
 				monitorLiveVars = true;
-				//evaluate function with default value to determine init stat.
+				// TODO: figure out how to pass arguments as arguments to the internalFunc.
+				arguments.length = this.internal.initArgVals.length;
+
+				console.log(this.internal.initArgVals.length);
+				console.log(arguments.length);
+				this.internal.initArgVals.forEach(function(v, i, arr){
+					arguments[i] = v;
+					console.log(i,v, arguments[i]);
+				});
+				console.log(this.internal.initArgVals);
+				console.log('arguments: ', arguments);
+
+				this.internal.value = this.internal.internalFunc(arguments);
+
+				_(liveVarMonitorArr).forEach(function (v){
+					ps.subscribe(self.internal.name,self.updateLiveVars.bind(v));
+				});
 				// subscribe to all liveVars that are triggered while running the function
 				monitorLiveVars = false;
 			};
 
 			if(dataValType == 'Array'){
-				console.log('dataValType is Array');
+				// console.log('dataValType is Array');
 				tempFunc.asdfType = 'asdfArray';
 			};
 
 			if(dataValType == 'Object'){
-				console.log('dataValType is Object');
+				// console.log('dataValType is Object');
 				tempFunc.asdfType = 'asdfObject';
 			};
 
+			// set reference to Home of liveVar.
 			tempFunc.asdfHome = self;	
 
 			return tempFunc;
 		};
 
 		function determineType(value){
+			// console.log('determineType type: ',value);
 
 			if(value.asdfType){
 				return value.asdfType;
@@ -150,11 +191,21 @@ define([
 
 			for(var i = 0;i<typeArr.length;i++){
 				if(_[('is' + typeArr[i])](value)){
-					console.log(typeArr[i]);
+					// console.log(typeArr[i]);
 					return typeArr[i];
 				};
 			};
 		};
+		// creates an array of arguments that can be used by functions as values.
+		function determineArgVals(args, amountToSkip){
+			var argArr = Array.prototype.slice.call(args);
+
+			for(var i = 0; i < amountToSkip; i++){
+				argArr.shift();
+			};
+			
+			return argArr;
+		}
 
 		return ns;
 });

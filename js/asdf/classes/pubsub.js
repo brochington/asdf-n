@@ -12,7 +12,7 @@ define(['lodash'], function (_){
 	};
 
 	ns.publish = function(topicName, passedValue){
-		console.log('publish!', topicName);
+		// console.log('publish!', topicName);
 		var subscribers = topics[topicName];
 
 		// which is faster here? for loop, forEach, or lodash .each?
@@ -25,7 +25,7 @@ define(['lodash'], function (_){
 	};
 
 	ns.subscribe = function(topicName, functionToCall){
-		console.log('subscribe!');
+		// console.log('subscribe!');
 		var token = ++uid;
 
 		if(!topics[topicName]){ns.addToTopics(topicName)};
