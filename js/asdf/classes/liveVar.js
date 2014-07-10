@@ -33,29 +33,7 @@ define([
 		// liveVar class 
 		function LiveVar(data) {
 			var self = this,
-				liveVarFunc = createLiveVarFunction(data, self),
-				dataValType = determineType(data.value);
-
-			if(dataValType == 'String' || dataValType == 'Number' || dataValType == 'Boolean'){
-				liveVarFunc.asdfType = 'asdfPrimitive';				
-			};
-
-			if(dataValType == 'Function'){
-				console.log('dataValType is Function.');
-				liveVarFunc.asdfType = 'asdfFunction';
-			};
-
-			if(dataValType == 'Array'){
-				console.log('dataValType is Array');
-				liveVarFunc.asdfType = 'asdfArray';
-			};
-
-			if(dataValType == 'Object'){
-				console.log('dataValType is Object');
-				liveVarFunc.asdfType = 'asdfObject';
-			};
-
-			liveVarFunc.asdfHome = self;	
+				liveVarFunc = createLiveVarFunction(data, self);
 
 			this.internal = {
 				name: data.name,
@@ -120,15 +98,35 @@ define([
 
 		function createLiveVarFunction(data, self){
 			var tempFunc = new Function(),
-				value = data.value;
-
-			//setup the properties on the function that will be passed around.
+				dataValType = determineType(data.value);
 
 			// this is the magic function!
 			tempFunc = function(){
 
 				return self.internal.value;
+			};	
+
+			//setup the properties on the function that will be passed around.
+			if(dataValType == 'String' || dataValType == 'Number' || dataValType == 'Boolean'){
+				tempFunc.asdfType = 'asdfPrimitive';				
 			};
+
+			if(dataValType == 'Function'){
+				console.log('dataValType is Function.');
+				tempFunc.asdfType = 'asdfFunction';
+			};
+
+			if(dataValType == 'Array'){
+				console.log('dataValType is Array');
+				tempFunc.asdfType = 'asdfArray';
+			};
+
+			if(dataValType == 'Object'){
+				console.log('dataValType is Object');
+				tempFunc.asdfType = 'asdfObject';
+			};
+
+			tempFunc.asdfHome = self;	
 
 			return tempFunc;
 		};
