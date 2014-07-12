@@ -36,12 +36,14 @@ require([
 
 	// test 3
 
+	console.log('running test 3');
+
 	var test3Function = function(text){
 		// console.log('test 3 print: ' + text);
 		return 'test 3 return: ' + text;
 	};
 
-	a.newLiveVar('testFunction', test3Function, 'starting value');
+	a.newLiveVar('testFunction', test3Function, {arg1: 'starting value'});
 
 	if(testFlag && a.testFunction() == 'test 3 return: starting value'){
 		console.log('test 3 pass');
@@ -56,7 +58,7 @@ require([
 		return arg1 + arg2;
 	};
 
-	a.newLiveVar('testFuncFour', testFunction4, 10, 20);
+	a.newLiveVar('testFuncFour', testFunction4, {arg1: 10, arg2: 20});
 
 	if(testFlag && a.testFuncFour() == 30){
 		console.log('test 4 pass');

@@ -20,7 +20,8 @@ define([
 				value: new LiveVar({
 					name: Varname,
 					value: initValue,
-					initArgVals: determineArgVals(arguments, 2)
+					// initArgVals: determineArgVals(arguments, 2)
+					initArgVals: initArgVals || null
 				})
 			});
 
@@ -44,7 +45,8 @@ define([
 				name: data.name,
 				value: data.value,
 				initArgVals: data.initArgVals,
-				internalFunc: null
+				internalFunc: null,
+				tempSetVal: null
 			};
 
 			this.internal.internalFunc = this.createLiveVarFunction();
@@ -72,24 +74,19 @@ define([
 					return self.internal.internalFunc;
 				},
 				set: function(val){
-					// console.log('set value:', val);
+					this.internal.tempSetVal = val;
+
 					var valType = determineType(val);
 					// console.log('valType: ', valType);
 
 					// handle type usecases here. 
-
 					if(valType == 'asdfPrimitive'){
-						console.dir(val);
-
-						self.internal.value = val.asdfHome.internal.value;
-						
-						ps.subscribe(val.asdfHome.internal.name, self.updateLiveVars.bind(self));
-
-						return;
+						this.handleAsdfPrimitive();
 					};
 
 					if(valType == 'asdfFunction'){
-						// console.log('val is asdf function');
+						console.log('val is asdf function');
+						this.handleAsdfFunction();
 					};
 
 					if(valType == 'String' || valType == 'Number' || valType == 'Boolean'){
@@ -130,40 +127,13 @@ define([
 			//setup the properties on the function that will be passed around.
 			if(dataValType == 'String' || dataValType == 'Number' || dataValType == 'Boolean'){
 				// console.log('is a primative...');
-				tempFunc.asdfType = 'asdfPrimitive';				
+				tempFunc.asdfType = 'asdfPrimitive';
 			};
 
 			// If value is a function, 
 			if(dataValType == 'Function'){
-				console.log('dataValType is Function.');
 				tempFunc.asdfType = 'asdfFunction';
-
-				// move function the internalFunc property so that value can be the evaluated value of
-				// the function.
-				
-				this.internal.internalFunc = this.internal.value;
-				// evaluate function with default value to determine init value and 
-				// see if any liveVars are being used inside of the function. subscribe to them is so.
-				monitorLiveVars = true;
-				// TODO: figure out how to pass arguments as arguments to the internalFunc.
-				arguments.length = this.internal.initArgVals.length;
-
-				console.log(this.internal.initArgVals.length);
-				console.log(arguments.length);
-				this.internal.initArgVals.forEach(function(v, i, arr){
-					arguments[i] = v;
-					console.log(i,v, arguments[i]);
-				});
-				console.log(this.internal.initArgVals);
-				console.log('arguments: ', arguments);
-
-				this.internal.value = this.internal.internalFunc(arguments);
-
-				_(liveVarMonitorArr).forEach(function (v){
-					ps.subscribe(self.internal.name,self.updateLiveVars.bind(v));
-				});
-				// subscribe to all liveVars that are triggered while running the function
-				monitorLiveVars = false;
+				this.initAsdfFunction();
 			};
 
 			if(dataValType == 'Array'){
@@ -180,6 +150,46 @@ define([
 			tempFunc.asdfHome = self;	
 
 			return tempFunc;
+		};
+
+		LiveVar.prototype.initAsdfFunction = function(){
+			console.log('initAsdfFunction');
+			console.dir(this);
+
+			this.internal.internalFunc = this.internal.value;
+			// evaluate function with default value to determine init value and 
+			// see if any liveVars are being used inside of the function. subscribe to them is so.
+			monitorLiveVars = true;
+			// TODO: figure out how to pass arguments as arguments to the internalFunc.
+			// use .apply() to pass an array of arguments.
+			if(this.internal.initArgVals){
+				for(var argKey in this.internal.initArgVals){
+					this.internal.internalFunc[argKey] = this.internal.initArgVals[argKey];
+				};	
+			}
+			  
+			// console.dir(this.internal.internalFunc);
+
+			this.internal.value = this.internal.internalFunc.apply(/*add stuff here!!*/);
+
+			_(liveVarMonitorArr).forEach(function (v){
+				ps.subscribe(self.internal.name,self.updateLiveVars.bind(v));
+			});
+			// subscribe to all liveVars that are triggered while running the function
+			monitorLiveVars = false;
+		};
+
+		LiveVar.prototype.handleAsdfFunction = function(){
+			console.log('handleAsdfFunction');
+
+		};
+
+		LiveVar.prototype.handleAsdfPrimitive = function(){
+			var val = this.internal.tempSetVal;
+
+			this.internal.value = val.asdfHome.internal.value;
+			
+			ps.subscribe(val.asdfHome.internal.name, this.updateLiveVars.bind(this));
 		};
 
 		function determineType(value){
