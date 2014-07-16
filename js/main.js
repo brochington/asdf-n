@@ -43,7 +43,7 @@ require([
 		return 'test 3 return: ' + text;
 	};
 
-	a.newLiveVar('testFunction', test3Function, {arg1: 'starting value'});
+	a.newLiveVar('testFunction', test3Function, {myarg1: 'starting value'});
 
 	if(testFlag && a.testFunction() == 'test 3 return: starting value'){
 		console.log('test 3 pass');
@@ -82,3 +82,4 @@ require([
 
 	// console.timeEnd('loop1');
 });
+

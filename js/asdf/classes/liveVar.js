@@ -11,9 +11,11 @@ define([
 			typeArr = ['Undefined','String','Number','Boolean','Function',
 						'Array','Date','Null','Object','Null','NaN'];
 
+		// to temp expose liveVarValues:
+		ns.liveVarValues = liveVarValues; 
+
 		// Creates a new liveVar property and variable. 
 		ns.newLiveVar = function(Varname, initValue, initArgVals){
-
 
 
 			Object.defineProperty(liveVarValues, Varname, {
@@ -23,18 +25,24 @@ define([
 					// initArgVals: determineArgVals(arguments, 2)
 					initArgVals: initArgVals || null
 				})
-			});
+			});			
 
 			Object.defineProperty(ns, Varname, {
 				get: function(){
 					// console.log('liveVar GET');
-					return liveVarValues[Varname].value;
+					// console.log(Varname);
+					// console.log(liveVarValues);
+					if(liveVarValues[Varname]){
+						return liveVarValues[Varname].value;	
+					}
 				},
 				set: function(val){
 					// console.log('liveVAR SET');
 					liveVarValues[Varname].value = val;
 				}
 			});
+
+
 		};
 		// liveVar class 
 		function LiveVar(data) {
@@ -48,8 +56,6 @@ define([
 				internalFunc: null,
 				tempSetVal: null
 			};
-
-			this.internal.internalFunc = this.createLiveVarFunction();
 
 			Object.defineProperty(this, 'name', {
 				get: function(){
@@ -99,7 +105,9 @@ define([
 						return;
 					};
 				}
-			})
+			});
+
+			this.internal.internalFunc = this.createLiveVarFunction();
 		};
 
 		LiveVar.prototype.updateLiveVars = function(passedValue){
@@ -155,8 +163,18 @@ define([
 		LiveVar.prototype.initAsdfFunction = function(){
 			console.log('initAsdfFunction');
 			console.dir(this);
+			console.log(this.internal.initArgVals);
+			console.log(this.internal.value);
+
+			var argArr = _.map(this.internal.initArgVals, function(argVal){
+				return argVal;
+			});
+			console.log(ns[this.internal.name]);
 
 			this.internal.internalFunc = this.internal.value;
+
+			console.log(this.internal.internalFunc);
+
 			// evaluate function with default value to determine init value and 
 			// see if any liveVars are being used inside of the function. subscribe to them is so.
 			monitorLiveVars = true;
@@ -166,11 +184,10 @@ define([
 				for(var argKey in this.internal.initArgVals){
 					this.internal.internalFunc[argKey] = this.internal.initArgVals[argKey];
 				};	
-			}
-			  
-			// console.dir(this.internal.internalFunc);
+			};
 
-			this.internal.value = this.internal.internalFunc.apply(/*add stuff here!!*/);
+			this.internal.value = this.internal.internalFunc.apply(this, argArr);
+			console.log(this.internal.value);
 
 			_(liveVarMonitorArr).forEach(function (v){
 				ps.subscribe(self.internal.name,self.updateLiveVars.bind(v));
@@ -215,6 +232,10 @@ define([
 			};
 			
 			return argArr;
+		}
+
+		function createArgArray(argObj){
+
 		}
 
 		return ns;
