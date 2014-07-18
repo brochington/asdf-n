@@ -15,7 +15,7 @@ define([
 		ns.liveVarValues = liveVarValues; 
 
 		// Creates a new liveVar property and variable. 
-		ns.newLiveVar = function(Varname, initValue, initArgVals){
+		ns.newLiveVar = function(Varname, initValue, initArgVals, initContext){
 
 
 			Object.defineProperty(liveVarValues, Varname, {
@@ -23,7 +23,8 @@ define([
 					name: Varname,
 					value: initValue,
 					// initArgVals: determineArgVals(arguments, 2)
-					initArgVals: initArgVals || null
+					initArgVals: initArgVals || null,
+					initContext: initContext || window
 				})
 			});			
 
@@ -80,6 +81,7 @@ define([
 					return self.internal.internalFunc;
 				},
 				set: function(val){
+					// console.log('value set');
 					this.internal.tempSetVal = val;
 
 					var valType = determineType(val);
@@ -87,6 +89,7 @@ define([
 
 					// handle type usecases here. 
 					if(valType == 'asdfPrimitive'){
+						console.log('it is an asdfPrimitive.');
 						this.handleAsdfPrimitive();
 					};
 
@@ -96,11 +99,11 @@ define([
 					};
 
 					if(valType == 'String' || valType == 'Number' || valType == 'Boolean'){
-						// console.log('type1', self.internal.name, val);
+						console.log('type1', self.internal.name, val);
 
 						self.internal.value = val;
-
-						ps.publish(self.internal.name, val);
+						console.log(self.internal.name);
+						ps.publish(self.internal.name);
 
 						return;
 					};
@@ -110,12 +113,27 @@ define([
 			this.internal.internalFunc = this.createLiveVarFunction();
 		};
 
-		LiveVar.prototype.updateLiveVars = function(passedValue){
-			// console.log('proto updateLiveVars');
-			// console.log(this);
+		LiveVar.prototype.updateLiveVars = function(){
+			console.log('proto updateLiveVars');
+			console.dir(this);
 			// console.log(passedValue);
 
-			this.internal.value = passedValue;
+			if(this.internal.internalFunc.asdfType == 'asdfPrimitive'){
+
+			}
+
+			if(this.internal.internalFunc.asdfType == 'asdfFunction'){
+				console.log('bang');
+				this.updateAsdfFunction();
+			}
+
+			// this.internal.value = passedValue;
+		};
+
+		LiveVar.prototype.updateAsdfFunction = function(){
+			console.log('updateAsdfFunction');
+
+			var argArr = getArgArr(this.internal.initArgVals);
 		};
 
 		LiveVar.prototype.createLiveVarFunction = function (){
@@ -161,19 +179,18 @@ define([
 		};
 
 		LiveVar.prototype.initAsdfFunction = function(){
-			console.log('initAsdfFunction');
-			console.dir(this);
-			console.log(this.internal.initArgVals);
-			console.log(this.internal.value);
+			var self = this;
+			// console.log('initAsdfFunction');
+
+			if(typeof this.internal.initArgVals == 'string'){
+				console.log('initArgVals is a string, and shouldn\'t be!');
+			};
 
 			var argArr = _.map(this.internal.initArgVals, function(argVal){
 				return argVal;
 			});
-			console.log(ns[this.internal.name]);
 
 			this.internal.internalFunc = this.internal.value;
-
-			console.log(this.internal.internalFunc);
 
 			// evaluate function with default value to determine init value and 
 			// see if any liveVars are being used inside of the function. subscribe to them is so.
@@ -185,12 +202,14 @@ define([
 					this.internal.internalFunc[argKey] = this.internal.initArgVals[argKey];
 				};	
 			};
-
-			this.internal.value = this.internal.internalFunc.apply(this, argArr);
-			console.log(this.internal.value);
+			// console.log(argArr);
+			// console.log(this.internal.internalFunc);
+			this.internal.value = this.internal.internalFunc.apply(this.internal.initContext, argArr);
+			// console.log(this.internal.value);
 
 			_(liveVarMonitorArr).forEach(function (v){
-				ps.subscribe(self.internal.name,self.updateLiveVars.bind(v));
+				console.log('v', v);
+				ps.subscribe(v.internal.name,self.updateLiveVars.bind(self));
 			});
 			// subscribe to all liveVars that are triggered while running the function
 			monitorLiveVars = false;
@@ -202,6 +221,7 @@ define([
 		};
 
 		LiveVar.prototype.handleAsdfPrimitive = function(){
+			console.log('handleAsdfPrimitive');
 			var val = this.internal.tempSetVal;
 
 			this.internal.value = val.asdfHome.internal.value;
@@ -234,8 +254,12 @@ define([
 			return argArr;
 		}
 
-		function createArgArray(argObj){
-
+		function getArgArr(argsInObj) {
+			var tempArr = [];
+			for(var key in argsInObj){
+				tempArr.push(argsInObj[key]);
+			}
+			return tempArr;
 		}
 
 		return ns;

@@ -15,24 +15,24 @@ require([
 
 	// test 1
 
-	a.myFirstVar = 'there';
-	if(a.myFirstVar() == 'there' && testFlag){
-		console.log('test 1 pass');
-	}else{
-		console.log('test 1 fail');
-	};
+	// a.myFirstVar = 'there';
+	// if(a.myFirstVar() == 'there' && testFlag){
+	// 	console.log('test 1 pass');
+	// }else{
+	// 	console.log('test 1 fail');
+	// };
 
 	// test 2
 
-	a.myFirstVar = 'update in test 2';
-	a.mySecondVar = a.myFirstVar;
-	a.myFirstVar = 'update in test again';
+	// a.myFirstVar = 'update in test 2';
+	// a.mySecondVar = a.myFirstVar;
+	// a.myFirstVar = 'update in test again';
 
-	if(testFlag && a.mySecondVar() == 'update in test again'){
-		console.log('test 2 pass');
-	}else{
-		console.log('test 2 fail');
-	}
+	// if(testFlag && a.mySecondVar() == 'update in test again'){
+	// 	console.log('test 2 pass');
+	// }else{
+	// 	console.log('test 2 fail');
+	// }
 
 	// test 3
 
@@ -45,12 +45,12 @@ require([
 
 	a.newLiveVar('testFunction', test3Function, {myarg1: 'starting value'});
 
-	if(testFlag && a.testFunction() == 'test 3 return: starting value'){
-		console.log('test 3 pass');
-	}else{
-		console.log('test 3 fail');
-		console.log(a.testFunction());
-	};
+	// if(testFlag && a.testFunction() == 'test 3 return: starting value'){
+	// 	console.log('test 3 pass');
+	// }else{
+	// 	console.log('test 3 fail');
+	// 	console.log(a.testFunction());
+	// };
 
 	// test 4 
 
@@ -60,16 +60,32 @@ require([
 
 	a.newLiveVar('testFuncFour', testFunction4, {arg1: 10, arg2: 20});
 
-	if(testFlag && a.testFuncFour() == 30){
-		console.log('test 4 pass');
-	} else{
-		console.log('test 4 fail');
-		a.testFuncFour();
-	};
+	// if(testFlag && a.testFuncFour() == 30){
+	// 	console.log('test 4 pass');
+	// } else{
+	// 	console.log('test 4 fail');
+	// 	a.testFuncFour();
+	// };
 
-	// a.newLiveVar('testFuncWithInternalLiveVars', function (stuff){
-	// 	return a.myFirstVar + ' ' + a.mySecondVar;
-	// }, 'detect liveVars in args...')
+	// test 5
+
+	a.myFirstVar = 'first';
+	a.mySecondVar = 'second';
+
+	a.newLiveVar('testFuncWithInternalLiveVars', function (stuff){
+		return a.myFirstVar() + ' ' + a.mySecondVar();
+	}, {arg1: 'detect liveVars in args...'});
+
+	if(testFlag && a.testFuncWithInternalLiveVars() == 'first second'){
+		console.log('test 5 pass');
+	} else {
+		console.log('test 5 fail');
+		console.log(a.testFuncWithInternalLiveVars());
+	}
+
+	// test 6
+
+	// a.mySecondVar = 'change';
 
 
 
