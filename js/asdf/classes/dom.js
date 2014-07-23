@@ -1,7 +1,8 @@
 define([
 	'lodash',
-	'vendor/lazy'
-	], function (_, Lazy){
+	'vendor/lazy',
+	'asdf/classes/utility'
+	], function (_, Lazy, utils){
 
 	var ns = {
 			playgroundNodeList: null, // holds the playground NodeList.
@@ -14,6 +15,7 @@ define([
 		animCount = 0,
 		
 		animId = null;
+
 
 	function DomObj(domNode) {
 		var self = this;
@@ -38,13 +40,16 @@ define([
 			Object.defineProperty(self, v, {
 				get: function(){
 					// console.log('get: ',v);
-					return self.__internal__.lastStyleValues[v];
+					return self.__internal__.computedStyles[v];
 				},
 				set: function(val){
-					// console.log('set: ', v, val, self.__internal__.computedStyles[v]);
 
-					// if(self.__internal__.lastStyleValues[v] == self.__internal__.computedStyles[v] &&
-					// 	self.__internal__.computedStyles[v] !== val){
+					var varType = utils.determineType(val);
+
+					console.log(varType);
+
+					if(varType === 'String' || varType === 'Number' || varType === 'Boolean'){
+						console.log('bang')
 						self.__internal__.lastStyleValues[v] = val;
 
 						tempFunc = self.updateStyle.bind(self, {
@@ -53,8 +58,8 @@ define([
 							value: val
 						});
 
-						ns.animUpdateArr.push(tempFunc);
-					// }
+						ns.animUpdateArr.push(tempFunc);	
+					}
 				}
 			})
 		});

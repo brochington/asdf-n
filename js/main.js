@@ -99,37 +99,22 @@ require([
 	// 	console.log('test 6 fail');
 	// 	console.log(a.testFuncWithInternalLiveVars());
 	// };
-
-	var testCount = 1;
+	
 	var cancelAnim = requestAnimationFrame(runTest);
 
 	function runTest(){
+		d.test_div_1.width = '300px';
 
-		for(var i = 1; i<= 200; i++){
-			// console.log('here');
-			var testDiv = d[('test_div_' + i)];
+		// for(var i = 1; i <= 5; i++){
+		// 	var testDiv = d[('test_div_' + i)];	
+		// 	testDiv.width = (parseInt(testDiv.width) + 10) + 'px';
+		// }	
 
-			console.log(('test_div_' + i), testDiv.width);
-
-			testDiv.width = (parseInt(testDiv.width) + 2) + 'px';
-			console.log((parseInt(testDiv.width) + 2) + 'px');
-			if((parseInt(testDiv.width)) > 200){
-				console.log('reset');
-				testDiv.width = '20px';
-			};
-		};
-		// cancelAnim = requestAnimationFrame(runTest);
+		// if(testDiv.width == '1000px'){
+		// 	cancelAnimationFrame(cancelAnim);
+		// } else {
+		// 	cancelAnim = requestAnimationFrame(runTest);			
+		// }
 	};
-
-	// runTest();
-
-	// console.time ('loop1');
-
-	// for(var i = 0; i<1000;i++){
-	// 	var testStr = 'testValue' + i;
-	// 	a.newLiveVar(testStr, i);
-	// };
-
-	// console.timeEnd('loop1');
 });
 
