@@ -1,3 +1,6 @@
+define([], function(){
+
+
 /*
  * @name Lazy.js
  *
@@ -59,7 +62,7 @@
  * [@dtao](https://github.com/dtao)
  */
 
-(function(context) {
+return (function(context) {
   /**
    * Wraps an object and returns a {@link Sequence}. For `null` or `undefined`,
    * simply returns an empty sequence (see {@link Lazy.strict} for a stricter
@@ -6270,7 +6273,9 @@
 
   // For browsers
   } else {
-    context.Lazy = Lazy;
+    // context.Lazy = Lazy;
+    return Lazy;
   }
 
 }(this));
+});

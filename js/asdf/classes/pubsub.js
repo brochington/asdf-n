@@ -1,5 +1,3 @@
-// Why choose pubsub over event emitters? Can I use Object.observe?
-
 define(['lodash'], function (_){	
 	var ns = {},
 		topics = {},
@@ -12,8 +10,10 @@ define(['lodash'], function (_){
 	};
 
 	ns.publish = function(topicName){
-		console.log('publish!', topicName);
+		// console.log('publish!', topicName);
 		var subscribers = topics[topicName];
+
+		// console.dir(subscribers);
 
 		// which is faster here? for loop, forEach, or lodash .each?
 		// test using console timer. 
@@ -26,8 +26,8 @@ define(['lodash'], function (_){
 	};
 
 	ns.subscribe = function(topicName, functionToCall){
-		console.log('subscribe!');
-		console.dir(functionToCall);
+		// console.log('subscribe!');
+		// console.dir(functionToCall);
 		var token = ++uid;
 
 		if(!topics[topicName]){ns.addToTopics(topicName)};

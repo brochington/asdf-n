@@ -5,7 +5,8 @@ require([
 
 	window.asdf = asdf;
 	var a = asdf.LiveVar,
-		testFlag = true;
+		d = asdf.Dom,
+		testFlag = false;
 
 
 
@@ -35,8 +36,6 @@ require([
 	// }
 
 	// test 3
-
-	console.log('running test 3');
 
 	var test3Function = function(text){
 		// console.log('test 3 print: ' + text);
@@ -69,25 +68,60 @@ require([
 
 	// test 5
 
-	a.myFirstVar = 'first';
-	a.mySecondVar = 'second';
+	// a.myFirstVar = 'first';
+	// a.mySecondVar = 'second';
 
-	a.newLiveVar('testFuncWithInternalLiveVars', function (stuff){
-		return a.myFirstVar() + ' ' + a.mySecondVar();
-	}, {arg1: 'detect liveVars in args...'});
+	// console.log(a.mySecondVar.asdfType);
 
-	if(testFlag && a.testFuncWithInternalLiveVars() == 'first second'){
-		console.log('test 5 pass');
-	} else {
-		console.log('test 5 fail');
-		console.log(a.testFuncWithInternalLiveVars());
-	}
+	// a.newLiveVar('testFuncWithInternalLiveVars', function (stuff){
+	// 	console.log('run testFuncWithInternalLiveVars');
+
+	// 	return a.myFirstVar() + ' ' + a.mySecondVar();
+
+	// }, {arg1: 'detect liveVars in args...'});
+
+	// if(testFlag && a.testFuncWithInternalLiveVars() == 'first second'){
+	// 	console.log('test 5 pass');
+	// } else {
+	// 	console.log('test 5 fail');
+	// 	console.log(a.testFuncWithInternalLiveVars());
+	// }
 
 	// test 6
 
 	// a.mySecondVar = 'change';
 
+	// console.log(a.testFuncWithInternalLiveVars());
 
+	// if(testFlag && a.testFuncWithInternalLiveVars() == 'first change'){
+	// 	console.log('test 6 pass');
+	// } else {
+	// 	console.log('test 6 fail');
+	// 	console.log(a.testFuncWithInternalLiveVars());
+	// };
+
+	var testCount = 1;
+	var cancelAnim = requestAnimationFrame(runTest);
+
+	function runTest(){
+
+		for(var i = 1; i<= 200; i++){
+			// console.log('here');
+			var testDiv = d[('test_div_' + i)];
+
+			console.log(('test_div_' + i), testDiv.width);
+
+			testDiv.width = (parseInt(testDiv.width) + 2) + 'px';
+			console.log((parseInt(testDiv.width) + 2) + 'px');
+			if((parseInt(testDiv.width)) > 200){
+				console.log('reset');
+				testDiv.width = '20px';
+			};
+		};
+		// cancelAnim = requestAnimationFrame(runTest);
+	};
+
+	// runTest();
 
 	// console.time ('loop1');
 

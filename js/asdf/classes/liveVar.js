@@ -54,7 +54,8 @@ define([
 				name: data.name,
 				value: data.value,
 				initArgVals: data.initArgVals,
-				internalFunc: null,
+				internalFunc: null, // used to hold function if liveVar is a function.
+				asdfReturnFunc: null, // only returns the value stored in value.
 				tempSetVal: null
 			};
 
@@ -78,31 +79,28 @@ define([
 						liveVarMonitorArr.push(self);	
 					};
 
-					return self.internal.internalFunc;
+					return self.internal.asdfReturnFunc;
 				},
 				set: function(val){
-					// console.log('value set');
 					this.internal.tempSetVal = val;
 
 					var valType = determineType(val);
-					// console.log('valType: ', valType);
 
 					// handle type usecases here. 
 					if(valType == 'asdfPrimitive'){
-						console.log('it is an asdfPrimitive.');
+						// console.log('it is an asdfPrimitive.');
 						this.handleAsdfPrimitive();
 					};
 
 					if(valType == 'asdfFunction'){
-						console.log('val is asdf function');
+						// console.log('val is asdf function');
 						this.handleAsdfFunction();
 					};
 
 					if(valType == 'String' || valType == 'Number' || valType == 'Boolean'){
-						console.log('type1', self.internal.name, val);
+						// console.log('type1', self.internal.name, val);
 
 						self.internal.value = val;
-						console.log(self.internal.name);
 						ps.publish(self.internal.name);
 
 						return;
@@ -110,7 +108,7 @@ define([
 				}
 			});
 
-			this.internal.internalFunc = this.createLiveVarFunction();
+			this.internal.asdfReturnFunc = this.createLiveVarFunction();
 		};
 
 		LiveVar.prototype.updateLiveVars = function(){
@@ -118,22 +116,27 @@ define([
 			console.dir(this);
 			// console.log(passedValue);
 
-			if(this.internal.internalFunc.asdfType == 'asdfPrimitive'){
-
+			if(this.internal.asdfReturnFunc.asdfType == 'asdfPrimitive'){
+				// console.log('updateLiveVars asdfPrimitive');
 			}
 
-			if(this.internal.internalFunc.asdfType == 'asdfFunction'){
-				console.log('bang');
+			if(this.internal.asdfReturnFunc.asdfType == 'asdfFunction'){
+				// console.log('updateLiveVars asdfFunction');
 				this.updateAsdfFunction();
 			}
-
-			// this.internal.value = passedValue;
 		};
 
 		LiveVar.prototype.updateAsdfFunction = function(){
 			console.log('updateAsdfFunction');
-
 			var argArr = getArgArr(this.internal.initArgVals);
+
+			console.log(argArr);
+			console.log(this);
+			console.log(this.internal.internalFunc);
+
+			this.internal.value = this.internal.internalFunc.apply(this, argArr);
+
+			ps.publish(this.internal.name);
 		};
 
 		LiveVar.prototype.createLiveVarFunction = function (){
@@ -208,7 +211,6 @@ define([
 			// console.log(this.internal.value);
 
 			_(liveVarMonitorArr).forEach(function (v){
-				console.log('v', v);
 				ps.subscribe(v.internal.name,self.updateLiveVars.bind(self));
 			});
 			// subscribe to all liveVars that are triggered while running the function
