@@ -39,15 +39,24 @@
         </div>
 
         <div id="asdf-playground2" data-playground>
-            <ul class="content-list"></ul>
+            <ul id="content_list"></ul>
         </div>
         
+
+        
+        <!-- <li class="line_item_1">${mykey}, and <%= myvalue %></li>     -->
+
         <script id="line_item" type="text/asdf-template">
-            <li class="line_item_1">${key}, and ${value}</li>
+            <li class="line_item_1">${first}, and ${last}</li>
         </script>
 
         <script id="second_line_item" type="text/asdf-template">
-            <li class="line-item-2">Second is: ${key}, and ${value}</li>
+            <li class="line_item_2">Second is: ${key}, and ${value}</li>
+        </script>
+
+        <script id="third_line_item" type="text/asdf-template">
+            <line_item>Third is: <my-key></my-key><my-value></my-value>
+            </line_item>
         </script>
         
 

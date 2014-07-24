@@ -6,6 +6,7 @@ require([
 	window.asdf = asdf;
 	var a = asdf.LiveVar,
 		d = asdf.Dom,
+		t = asdf.Template
 		testFlag = false;
 
 
@@ -100,21 +101,22 @@ require([
 	// 	console.log(a.testFuncWithInternalLiveVars());
 	// };
 	
-	var cancelAnim = requestAnimationFrame(runTest);
+	// template tests
 
-	function runTest(){
-		d.test_div_1.width = '300px';
+	// d.content_list.render(t.line_item, {mykey: 'Brochington', myvalue: 'Stilley'});
 
-		// for(var i = 1; i <= 5; i++){
-		// 	var testDiv = d[('test_div_' + i)];	
-		// 	testDiv.width = (parseInt(testDiv.width) + 10) + 'px';
-		// }	
+	a.newLiveVar('contentListArr', [
+		{first: 'Broch', last: 'Stilley'},
+		{first: 'Elmo', last: 'Dude'},
+		{first: 'Brad', last: 'Howard'}
+	]);
 
-		// if(testDiv.width == '1000px'){
-		// 	cancelAnimationFrame(cancelAnim);
-		// } else {
-		// 	cancelAnim = requestAnimationFrame(runTest);			
-		// }
-	};
+	d.content_list.render({
+		template: t.line_item, // this should be a liveVar too, able to be changed.
+		foreach: a.contentListArr
+	});
+
+
+
 });
 

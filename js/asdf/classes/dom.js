@@ -1,15 +1,16 @@
 define([
 	'lodash',
 	'vendor/lazy',
-	'asdf/classes/utility'
-	], function (_, Lazy, utils){
+	'asdf/classes/utility',
+	'asdf/classes/template'
+	], function (_, Lazy, utils, tpl){
 
 	var ns = {
 			playgroundNodeList: null, // holds the playground NodeList.
 			playgrounds: [], // array of references to playground dome nodes. 
 			animUpdateArr: [],
 			asdfTemplateNodes: [],
-			asdfTemplates: {}
+			asdfTemplates: {},
 		},
 		domNodeCacheObj = {}, // stores references to Dom nodes.
 		domObjects = {},
@@ -17,6 +18,8 @@ define([
 		animCount = 0,
 		
 		animId = null;
+
+		console.log(tpl);
 
 
 	function DomObj(domNode) {
@@ -28,6 +31,7 @@ define([
 			computedStyles: window.getComputedStyle(domNode),
 			lastStyleValues: {},
 			styleKeys: Object.keys(domNode.style),
+			renderConfigObj: null
 		};
 
 		this.__internal__.styleKeys.forEach(function(v, i, arr){
@@ -51,10 +55,9 @@ define([
 					console.log(varType);
 
 					if(varType === 'String' || varType === 'Number' || varType === 'Boolean'){
-						console.log('bang')
 						self.__internal__.lastStyleValues[v] = val;
 
-						tempFunc = self.updateStyle.bind(self, {
+						var tempFunc = self.updateStyle.bind(self, {
 							DomObj: self,
 							style: v, 
 							value: val
@@ -72,20 +75,85 @@ define([
 
 	DomObj.prototype.rawDomNode = function(){
 		return this.__internal__.domNode;
-	}
+	};
 
 	DomObj.prototype.updateStyles = function(){
 
 		this.styleObj.styleUpdateArr.forEach(function(v, i, arr){
 			console.log(v);
 		});
-	}
+	};
 
 	DomObj.prototype.updateStyle = function(data){
 		// console.log('updateStyle', data);
 		// console.log(data.DomObj.__internal__.computedStyles[data.style]);
 		data.DomObj.__internal__.domNode.style[data.style] = data.value;
 		// console.log(data.DomObj.__internal__.computedStyles[data.style]);
+	};
+
+	DomObj.prototype.replaceInnerHTML = function(data){
+		// NOTE: this should use document fragments to help reduce render times...
+		console.log(this.__internal__.domNode.innerHTML);
+		this.__internal__.domNode.innerHTML = data;
+	};
+
+	DomObj.prototype.appendChild = function(data){
+		console.log('askjdh');
+		// this.__internal__.domNode.appendChild(data);
+
+		this.__internal__.domNode.insertAdjacentHTML('beforeend', data);
+	};
+
+	DomObj.prototype.render = function(arg1, data){
+
+		if(data){
+			var dataType = utils.determineType(data);
+
+			if(dataType === 'Object'){
+				//basic handling of object for now...
+				var domString = template.domStringCompiled(data);
+
+				var tempFunc = this.replaceInnerHTML.bind(this, domString);
+
+				ns.animUpdateArr.push(tempFunc);
+			}
+		}else if(arg1 && arg1.template) {
+			// arg1 is a template config object.
+			console.log('has arg1');
+			this.__internal__.renderConfigObj = arg1;
+			this.renderWithConfigObj();
+
+		}
+	}
+
+	DomObj.prototype.renderWithConfigObj = function(){
+		console.log('renderWithConfigObj');
+		var self = this,
+			configObj = this.__internal__.renderConfigObj;
+
+		if(configObj.template){
+			console.log('configObj has template property');	
+		}
+
+		if(configObj.foreach){
+			console.log('configObj has foreach property');
+			var foreachVal = configObj.foreach;
+			// test to see if foreach value is a liveVar or not.
+			if(foreachVal.asdfType === 'asdfArray'){
+				var val = foreachVal();
+
+				val.forEach(function (v, i, arr){
+					console.log(v);
+					// console.log(configObj.template.domStringCompiled);
+					var domString = configObj.template.domStringCompiled(v);
+					// console.log(domString);
+
+					var tempFunc = self.appendChild.bind(self, domString);
+
+					ns.animUpdateArr.push(tempFunc);
+				});
+			}
+		}	
 	}
 
 	// Constructor for styles obj.
@@ -103,24 +171,9 @@ define([
 		return styleName;
 	};
 
-	function AsdfTemplate(node){
-		this.id = node.id;
-		this.originalScriptNode = node;
-	};
 
-	function initAsdfTemplates(){
-		ns.asdfTemplateNodes = document.querySelectorAll('script[type="text/asdf-template"]');
 
-		console.log(ns.asdfTemplateNodes);
-
-		for(var i = 0; i < ns.asdfTemplateNodes.length; i++){
-			Object.defineProperty(ns.asdfTemplates, ns.asdfTemplateNodes[i].id, {
-				value: new AsdfTemplate(ns.asdfTemplateNodes[i])
-			});
-		};
-
-		console.log(ns.asdfTemplates);
-	};
+	
 
 	// It doesn't make sense to make a d domeNode for EVERY
 	// dom node on the page, so we create playgrounds, where
@@ -169,7 +222,7 @@ define([
 	};
 
 	function processIdAsProp(domNode){
-		// console.log('processIdAsProp');
+		// console.log('processIdAsProp: ', domNode);
 		var id = domNode.id;
 
 		if(!ns[id]){
@@ -217,7 +270,7 @@ define([
 
 	function initDom(){
 		console.log('initDom');
-		initAsdfTemplates();
+		// tpl.initTemplates();
 		initAsdfPlaygrounds();
 	};
 

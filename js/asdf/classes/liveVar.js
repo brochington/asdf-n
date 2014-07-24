@@ -166,7 +166,7 @@ define([
 			};
 
 			if(dataValType == 'Array'){
-				// console.log('dataValType is Array');
+				console.log('dataValType is Array');
 				tempFunc.asdfType = 'asdfArray';
 			};
 
