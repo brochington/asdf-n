@@ -7,7 +7,9 @@ define([
 	var ns = {
 			playgroundNodeList: null, // holds the playground NodeList.
 			playgrounds: [], // array of references to playground dome nodes. 
-			animUpdateArr: []
+			animUpdateArr: [],
+			asdfTemplateNodes: [],
+			asdfTemplates: {}
 		},
 		domNodeCacheObj = {}, // stores references to Dom nodes.
 		domObjects = {},
@@ -101,9 +103,23 @@ define([
 		return styleName;
 	};
 
-	function initDom(){
-		console.log('initDom');
-		initAsdfPlaygrounds();
+	function AsdfTemplate(node){
+		this.id = node.id;
+		this.originalScriptNode = node;
+	};
+
+	function initAsdfTemplates(){
+		ns.asdfTemplateNodes = document.querySelectorAll('script[type="text/asdf-template"]');
+
+		console.log(ns.asdfTemplateNodes);
+
+		for(var i = 0; i < ns.asdfTemplateNodes.length; i++){
+			Object.defineProperty(ns.asdfTemplates, ns.asdfTemplateNodes[i].id, {
+				value: new AsdfTemplate(ns.asdfTemplateNodes[i])
+			});
+		};
+
+		console.log(ns.asdfTemplates);
 	};
 
 	// It doesn't make sense to make a d domeNode for EVERY
@@ -199,7 +215,11 @@ define([
 
 	animId = requestAnimationFrame(animationFrameFunc);
 
-
+	function initDom(){
+		console.log('initDom');
+		initAsdfTemplates();
+		initAsdfPlaygrounds();
+	};
 
 	// maybe this should be an IIFE instead?
 	initDom();
