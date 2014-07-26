@@ -52,6 +52,11 @@ d.containerDom.actions({
 	ifElse: [/*arg to evaluate*/, /*if true*/, /*else*/]
 });
 
+/*
+NOTE: in a render method that is attached to the d.domNode, the properties should match
+method names, and should essentially be the left hand side of a knockout binding.
+This way they can be user created, and maybe allow for things like animations and such...
+*/
 
 /*****************************************/
 a.newVar('tasks', []);
