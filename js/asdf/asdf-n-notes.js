@@ -52,12 +52,6 @@ d.containerDom.actions({
 	ifElse: [/*arg to evaluate*/, /*if true*/, /*else*/]
 });
 
-/*
-NOTE: in a render method that is attached to the d.domNode, the properties should match
-method names, and should essentially be the left hand side of a knockout binding.
-This way they can be user created, and maybe allow for things like animations and such...
-*/
-
 /*****************************************/
 a.newVar('tasks', []);
 
@@ -95,4 +89,21 @@ a.newVar('inputValue', {
 a.inputValue = d.someTextArea.value;
 
 
+/*
+NOTE: in a render method that is attached to the d.domNode, the properties should match
+method names, and should essentially be the left hand side of a knockout binding.
+This way they can be user created, and maybe allow for things like animations and such...
+*/
+
+// ideas for databinding method, 
+a.live('contentListArr', [
+	{first: 'Broch', last: 'Stilley'},
+	{first: 'Elmo', last: 'Dude'},
+	{first: 'Brad', last: 'Howard'}
+]);
+
+d.content_list.render({
+	template: t.line_item, // this should be a liveVar too, able to be changed.
+	foreach: a.contentListArr
+});
 

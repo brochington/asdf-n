@@ -1,3 +1,8 @@
+/*
+thoughts: 
+	1) should rename project to 'alive', and as in a.live('varName', 'value');
+*/
+
 require([
 	'asdf/asdf',
 	'lodash'
@@ -9,11 +14,9 @@ require([
 		t = asdf.Template
 		testFlag = false;
 
-
-
-	a.newLiveVar('myFirstVar', 'Hello');
-	a.newLiveVar('mySecondVar', 'SecondVar');
-	a.newLiveVar('myThird', 'third');
+	a.live('myFirstVar', 'Hello');
+	a.live('mySecondVar', 'SecondVar');
+	a.live('myThird', 'third');
 
 	// test 1
 
@@ -43,7 +46,7 @@ require([
 		return 'test 3 return: ' + text;
 	};
 
-	a.newLiveVar('testFunction', test3Function, {myarg1: 'starting value'});
+	a.live('testFunction', test3Function, {myarg1: 'starting value'});
 
 	// if(testFlag && a.testFunction() == 'test 3 return: starting value'){
 	// 	console.log('test 3 pass');
@@ -58,7 +61,7 @@ require([
 		return arg1 + arg2;
 	};
 
-	a.newLiveVar('testFuncFour', testFunction4, {arg1: 10, arg2: 20});
+	a.live('testFuncFour', testFunction4, {arg1: 10, arg2: 20});
 
 	// if(testFlag && a.testFuncFour() == 30){
 	// 	console.log('test 4 pass');
@@ -74,7 +77,7 @@ require([
 
 	// console.log(a.mySecondVar.asdfType);
 
-	// a.newLiveVar('testFuncWithInternalLiveVars', function (stuff){
+	// a.live('testFuncWithInternalLiveVars', function (stuff){
 	// 	console.log('run testFuncWithInternalLiveVars');
 
 	// 	return a.myFirstVar() + ' ' + a.mySecondVar();
@@ -105,17 +108,18 @@ require([
 
 	// d.content_list.render(t.line_item, {mykey: 'Brochington', myvalue: 'Stilley'});
 
-	a.newLiveVar('contentListArr', [
+	a.live('contentListArr', [
 		{first: 'Broch', last: 'Stilley'},
 		{first: 'Elmo', last: 'Dude'},
 		{first: 'Brad', last: 'Howard'}
 	]);
 
+	// d.content_list.render(t.line_item, a.contentListArr);
+
 	d.content_list.render({
 		template: t.line_item, // this should be a liveVar too, able to be changed.
 		foreach: a.contentListArr
-	});
-
+	});	
 
 
 });

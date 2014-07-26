@@ -3,8 +3,9 @@ define([
 	'asdf/classes/template',
 	'asdf/classes/dom',
 	'asdf/classes/liveVar',
+	'asdf/classes/bindings',
 	'lodash'
-	], function (ps, tpl, dom, LiveVar, _){
+	], function (ps, tpl, dom, LiveVar, b, _){
 	// Main define function of asdf
 
 	var asdf = {};
@@ -13,6 +14,7 @@ define([
 	asdf.Template = tpl;
 	asdf.Dom = dom;
 	asdf.ps = ps;
+	asdf.b = b;
 
 	return asdf;
 });

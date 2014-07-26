@@ -15,7 +15,7 @@ define([
 		ns.liveVarValues = liveVarValues; 
 
 		// Creates a new liveVar property and variable. 
-		ns.newLiveVar = function(Varname, initValue, initArgVals, initContext){
+		ns.live = function(Varname, initValue, initArgVals, initContext){
 
 
 			Object.defineProperty(liveVarValues, Varname, {

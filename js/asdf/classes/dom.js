@@ -2,8 +2,9 @@ define([
 	'lodash',
 	'vendor/lazy',
 	'asdf/classes/utility',
-	'asdf/classes/template'
-	], function (_, Lazy, utils, tpl){
+	'asdf/classes/template',
+	'asdf/classes/bindings'
+	], function (_, Lazy, utils, tpl, bindings){
 
 	var ns = {
 			playgroundNodeList: null, // holds the playground NodeList.
@@ -98,15 +99,15 @@ define([
 	};
 
 	DomObj.prototype.appendChild = function(data){
-		console.log('askjdh');
 		// this.__internal__.domNode.appendChild(data);
 
 		this.__internal__.domNode.insertAdjacentHTML('beforeend', data);
 	};
 
 	DomObj.prototype.render = function(arg1, data){
-
+		console.log('render');
 		if(data){
+			console.log('data:', data);
 			var dataType = utils.determineType(data);
 
 			if(dataType === 'Object'){
@@ -130,6 +131,8 @@ define([
 		console.log('renderWithConfigObj');
 		var self = this,
 			configObj = this.__internal__.renderConfigObj;
+
+
 
 		if(configObj.template){
 			console.log('configObj has template property');	
