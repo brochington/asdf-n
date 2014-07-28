@@ -159,6 +159,10 @@ define([
 		}	
 	}
 
+	function DomObjArray(data){
+
+	}
+
 	// Constructor for styles obj.
 	function DomStyleObj(styleName){
 		
@@ -174,58 +178,37 @@ define([
 		return styleName;
 	};
 
+	// Playground Contructor
+	function Playground(domNode){
 
+		this.domNode = domNode;
 
-	
+		this.fillDomNodeCacheArr(domNode);
+	}
 
-	// It doesn't make sense to make a d domeNode for EVERY
-	// dom node on the page, so we create playgrounds, where
-	// all the elements inside are created on the d object. 
-	function initAsdfPlaygrounds(){
-		//NOTE: ns.playgroundNodeList is a NodeList, NOT an array!
-		ns.playgroundNodeList = document.querySelectorAll('[data-playground]');
-
-		for(var i = 0; i < ns.playgroundNodeList.length; i++){
-			var node = ns.playgroundNodeList[i];
-			fillDomNodeCacheArr(node);
-			ns.playgrounds.push(node);
-		};
-	};
-
-	// this function is called recursively to add properties in the domNodeCacheArr Object.
-	function fillDomNodeCacheArr(domNode){
+	Playground.prototype.fillDomNodeCacheArr = function(domNode){
 
 		if(domNode && domNode.children){
 			for(var i = 0; i < domNode.children.length; i++){
 				var child = domNode.children[i];
-				// console.dir(child);
-				// need to sort and add properties to the domNodeCacheArr for: 
-				// 1) ids
-				// 2) classes (will be an array)
-				// 3) tag name
-				// others for later like childNode, parentNode, and whatever else you want.
 
-				// process for ids:
 				if(child){
 					if(child.id){
-						processIdAsProp(child);	
-					};
-
+						this.processIDAsProp(child);
+					}
 					if(child.classList.length > 0){
-						processClassesAsProps(child);
-					};
+						this.processClassesAsProps(child);
+					}
+				}
+				if(this.domNode.children[i].children){
+					this.fillDomNodeCacheArr(domNode.children[i]);
 				};
+			}
+		}
+	}
 
-				// call function recursively to process any more children.
-				if(domNode.children[i].children){
-					fillDomNodeCacheArr(domNode.children[i]);
-				};
-			};
-		};
-	};
-
-	function processIdAsProp(domNode){
-		// console.log('processIdAsProp: ', domNode);
+	Playground.prototype.processIDAsProp = function(domNode){
+		console.log('reached....');
 		var id = domNode.id;
 
 		if(!ns[id]){
@@ -251,9 +234,46 @@ define([
 		}
 	}
 
-	function processClassesAsProps(domNode){
-		// console.log('processClassesAsProps');
+	Playground.prototype.processClassesAsProps = function(domNode){
+		console.log(domNode.classList);
+
+		for(var i = 0; i < domNode.classList.length; i++){
+			var className = domNode.classList[i];
+
+			if(ns.hasOwnProperty(className)){
+				// add to class array...
+			} else {
+				// create and add to class array.
+				// Object.defineProperty(domObjects, className, {
+				// 	value: new DomObjArr(domNode)
+				// });
+
+				Object.defineProperty(ns, className, {
+					get: function(){
+
+					},
+					set: function(val){
+
+					}
+				})
+			}
+		}	
 	}
+
+	// It doesn't make sense to make a d domeNode for EVERY
+	// dom node on the page, so we create playgrounds, where
+	// all the elements inside are created on the d object. 
+	function initAsdfPlaygrounds(){
+		//NOTE: ns.playgroundNodeList is a NodeList, NOT an array!
+		ns.playgroundNodeList = document.querySelectorAll('[data-playground]');
+
+		for(var i = 0; i < ns.playgroundNodeList.length; i++){
+			var node = ns.playgroundNodeList[i];
+			// fillDomNodeCacheArr(node);
+			// ns.playgrounds.push(node);
+			ns.playgrounds.push(new Playground(node))
+		};
+	};
 
 	function animationFrameFunc(){
 		if(ns.animUpdateArr.length > 0){
@@ -272,8 +292,6 @@ define([
 	animId = requestAnimationFrame(animationFrameFunc);
 
 	function initDom(){
-		console.log('initDom');
-		// tpl.initTemplates();
 		initAsdfPlaygrounds();
 	};
 

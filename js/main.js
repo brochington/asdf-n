@@ -122,5 +122,38 @@ require([
 	});	
 
 
+// loop test
+
+var testArr = new Array(10000);
+var testVal1 = 0;
+var testVal2 = 0;
+var testVal3 = 0;
+
+console.time('first');
+
+for(var i =0; i< testArr.length; i++){
+	testVal1++;
+}
+
+console.timeEnd('first');
+
+console.time('second');
+
+for(var i = 0,l = testArr.length; i<l;i++){
+	testVal2++;
+}
+
+console.timeEnd('second');
+
+console.time('third');
+
+
+
+testArr.forEach(function(v, i, arr){
+	testVal3++;
+});
+
+console.timeEnd('third');
+
 });
 
