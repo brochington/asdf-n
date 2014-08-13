@@ -107,3 +107,29 @@ d.content_list.render({
 	foreach: a.contentListArr
 });
 
+/*
+What am I going to do about embeded templates, and how are they going to get info from it's parent template?
+Should I create some form of partial? 
+*/
+
+<div id="test-playground">
+    <div id="my_container">
+
+    </div>
+</div>        
+
+d.my_container.bindings({
+	template: 'item',
+	forEach: a.someArray,
+});
+
+// template 1
+<script id="item" type="text/asdf-template">
+    
+</script>
+
+/* TODO: 
+	- scan templates when they are "gotten" so that the classes and ids are added to the d object.
+	- handle both ids and classes.
+
+

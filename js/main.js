@@ -116,10 +116,12 @@ require([
 
 	// d.content_list.render(t.line_item, a.contentListArr);
 
-	d.content_list.render({
-		template: t.line_item, // this should be a liveVar too, able to be changed.
-		foreach: a.contentListArr
-	});	
+	// d.content_list.render({
+	// 	template: t.line_item, // this should be a liveVar too, able to be changed.
+	// 	foreach: a.contentListArr
+	// });	
+
+	
 
 
 // loop test

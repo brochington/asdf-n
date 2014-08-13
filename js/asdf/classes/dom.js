@@ -158,8 +158,46 @@ define([
 			}
 		}	
 	}
-
+	// An Array of Dom Objects, Used in handling of classes, and Id's.
 	function DomObjArray(data){
+		console.log('inside dom array');
+		console.dir(data);
+		var self = this;
+		var testObj = {};
+
+		this.__internal__ = {
+			DomObjArr: [new DomObj(data)]
+		};
+
+		console.time('secondTime');
+		// add properties of the style names to the DomObjArray
+		this.__internal__.DomObjArr[0].__internal__.styleKeys.forEach(function (v, i, arr){
+			Object.defineProperty(self, v, {
+				get: function(){
+					console.log('get me!');
+				},
+				set: function(val){
+					console.log('set me!', val);
+				}
+			})
+		})
+		// create properties on the main node for each style property.
+		
+		console.timeEnd('secondTime');
+
+		// console.time('thirdTime');
+		
+		// console.timeEnd('thirdTime');
+	}
+	// set the prototype of the DomObjArray so that it can access array methods.
+	DomObjArray.prototype = new Array();
+
+	// a method created to be able to safely add a domNode to a DomObjArray
+	DomObjArray.prototype.pushDomNode = function(domNode){
+		console.log('reached pushDomNode');
+		this.push(domNode);
+
+		this.__internal__.DomObjArr.push(domNode);
 
 	}
 
@@ -193,12 +231,7 @@ define([
 				var child = domNode.children[i];
 
 				if(child){
-					if(child.id){
-						this.processIDAsProp(child);
-					}
-					if(child.classList.length > 0){
-						this.processClassesAsProps(child);
-					}
+					this.processDomNodeAsProp(child);
 				}
 				if(this.domNode.children[i].children){
 					this.fillDomNodeCacheArr(domNode.children[i]);
@@ -207,58 +240,107 @@ define([
 		}
 	}
 
-	Playground.prototype.processIDAsProp = function(domNode){
-		console.log('reached....');
-		var id = domNode.id;
-
-		if(!ns[id]){
-			// add domNode to domNodeCacheObj
-			Object.defineProperty(domNodeCacheObj, id, {
-				value: domNode
-			});
-			// create new DomObj, place it in domObjects
-			Object.defineProperty(domObjects, id, {
-				value: new DomObj(domNode)
-			});
-
-			// create accessor to domObject
-			// pubsub actions will most likely be handled here.''
-			Object.defineProperty(ns, id, {
-				get: function(){
-					return domObjects[id];
-				},
-				set: function(val){
-
+	Playground.prototype.processDomNodeAsProp = function(domNode){
+		if(domNode.id && !ns.hasOwnProperty(domNode.id)){
+			// console.log('domNode has id');
+			this.defineDomNodeAsProp(domNode, domNode.id);
+		}
+		if(domNode.classList.length > 0){
+			// console.log('domNode has at least one class.');
+			for(var i = 0, l = domNode.classList.length; i<l; i++){
+				var className = domNode.classList[i];
+				// console.log(className);
+				//check to see if className has already been added to 
+				// the ns object.
+				if(ns.hasOwnProperty(className)){
+					domObjects[className].pushDomNode(domNode);
+					// add className to appropriate objects. 
+				
+				} else{
+					this.defineDomNodeAsProp(domNode, className);
 				}
-			});
+
+			}
 		}
 	}
 
-	Playground.prototype.processClassesAsProps = function(domNode){
-		console.log(domNode.classList);
+	Playground.prototype.defineDomNodeAsProp = function(domNode, propName){
+		console.log(domNode);
+		Object.defineProperty(domNodeCacheObj, propName, {
+			value: domNode
+		});
 
-		for(var i = 0; i < domNode.classList.length; i++){
-			var className = domNode.classList[i];
+		Object.defineProperty(domObjects, propName, {
+			value: new DomObjArray(domNode)
+		});
 
-			if(ns.hasOwnProperty(className)){
-				// add to class array...
-			} else {
-				// create and add to class array.
-				// Object.defineProperty(domObjects, className, {
-				// 	value: new DomObjArr(domNode)
-				// });
+		Object.defineProperty(ns, propName, {
+			get: function(){
+				return domObjects[propName];
+			},
+			set: function(val){
 
-				Object.defineProperty(ns, className, {
-					get: function(){
-
-					},
-					set: function(val){
-
-					}
-				})
 			}
-		}	
+		});
+		// set an array value in the newly created DomObjArray as part of
+		// the init process.
+		domObjects[propName].push(domNode);
 	}
+
+	// Playground.prototype.addIDAsProp = function(domNode){
+	// 	console.log('reached....');
+
+	// 	// add domNode to domNodeCacheObj
+	// 	Object.defineProperty(domNodeCacheObj, id, {
+	// 		value: domNode
+	// 	});
+	// 	// create new DomObj, place it in domObjects
+	// 	Object.defineProperty(domObjects, id, {
+	// 		value: new DomObjArray(domNode)
+	// 	});
+
+	// 	// create accessor to domObject
+	// 	// pubsub actions will most likely be handled here.''
+	// 	Object.defineProperty(ns, id, {
+	// 		get: function(){
+	// 			return domObjects[id];
+	// 		},
+	// 		set: function(val){
+
+	// 		}
+	// 	});
+	// }
+
+	// Playground.prototype.processClassesAsProps = function(domNode){
+	// 	console.log("processClassesAsProps: ");
+	// 	console.dir(domNode.classList);
+
+	// 	for(var i = 0; i < domNode.classList.length; i++){
+	// 		var className = domNode.classList[i];
+
+	// 		if(ns.hasOwnProperty(className)){
+	// 			// console.log("has className");
+	// 			// domObjects[className].push(new DomObj(domNode));
+	// 			// add to class array...
+	// 		} else {
+	// 			// console.log(className);
+	// 			// console.log('does not have class name');
+	// 			// create and add to class array.
+	// 			Object.defineProperty(domObjects, className, {
+	// 				value: new DomObjArray(domNode)
+	// 			});
+
+	// 			Object.defineProperty(ns, className, {
+	// 				get: function(){
+	// 					return domObjects[className];
+	// 				},
+	// 				set: function(val){
+
+	// 				}
+	// 			})
+	// 		}
+	// 	}	
+	// }
 
 	// It doesn't make sense to make a d domeNode for EVERY
 	// dom node on the page, so we create playgrounds, where
