@@ -9,19 +9,11 @@ define([
 	var ns = {
 			playgroundNodeList: null, // holds the playground NodeList.
 			playgrounds: [], // array of references to playground dome nodes. 
-			animUpdateArr: [],
 			asdfTemplateNodes: [],
 			asdfTemplates: {},
 		},
 		domNodeCacheObj = {}, // stores references to Dom nodes.
-		domObjects = {},
-		
-		animCount = 0,
-		
-		animId = null;
-
-		console.log(tpl);
-
+		domObjects = {};
 
 	function DomObj(domNode) {
 		var self = this;
@@ -56,22 +48,15 @@ define([
 					console.log(varType);
 
 					if(varType === 'String' || varType === 'Number' || varType === 'Boolean'){
-						self.__internal__.lastStyleValues[v] = val;
 
-						var tempFunc = self.updateStyle.bind(self, {
-							DomObj: self,
+						self.updateStyle({
 							style: v, 
 							value: val
 						});
-
-						ns.animUpdateArr.push(tempFunc);	
 					}
 				}
 			})
 		});
-		
-
-		// add css properties to this object when creating.
 	};
 
 	DomObj.prototype.rawDomNode = function(){
@@ -86,10 +71,14 @@ define([
 	};
 
 	DomObj.prototype.updateStyle = function(data){
-		// console.log('updateStyle', data);
-		// console.log(data.DomObj.__internal__.computedStyles[data.style]);
-		data.DomObj.__internal__.domNode.style[data.style] = data.value;
-		// console.log(data.DomObj.__internal__.computedStyles[data.style]);
+		var i = this.__internal__;
+
+		// save value of last style. (why?)
+		i.lastStyleValues[data.style] = i.computedStyles[data.style];
+		// set the css prop val;
+		i.domNode.style[data.style] = data.value;
+
+		i.computedStyles = window.getComputedStyle(i.domNode);
 	};
 
 	DomObj.prototype.replaceInnerHTML = function(data){
@@ -104,111 +93,121 @@ define([
 		this.__internal__.domNode.insertAdjacentHTML('beforeend', data);
 	};
 
-	DomObj.prototype.render = function(arg1, data){
-		console.log('render');
-		if(data){
-			console.log('data:', data);
-			var dataType = utils.determineType(data);
+	// DomObj.prototype.render = function(arg1, data){
+	// 	console.log('render');
+	// 	if(data){
+	// 		console.log('data:', data);
+	// 		var dataType = utils.determineType(data);
 
-			if(dataType === 'Object'){
-				//basic handling of object for now...
-				var domString = template.domStringCompiled(data);
+	// 		if(dataType === 'Object'){
+	// 			//basic handling of object for now...
+	// 			var domString = template.domStringCompiled(data);
 
-				var tempFunc = this.replaceInnerHTML.bind(this, domString);
+	// 			var tempFunc = this.replaceInnerHTML.bind(this, domString);
 
-				ns.animUpdateArr.push(tempFunc);
-			}
-		}else if(arg1 && arg1.template) {
-			// arg1 is a template config object.
-			console.log('has arg1');
-			this.__internal__.renderConfigObj = arg1;
-			this.renderWithConfigObj();
+	// 			ns.animUpdateArr.push(tempFunc);
+	// 		}
+	// 	}else if(arg1 && arg1.template) {
+	// 		// arg1 is a template config object.
+	// 		console.log('has arg1');
+	// 		this.__internal__.renderConfigObj = arg1;
+	// 		this.renderWithConfigObj();
 
-		}
-	}
+	// 	}
+	// }
 
-	DomObj.prototype.renderWithConfigObj = function(){
-		console.log('renderWithConfigObj');
-		var self = this,
-			configObj = this.__internal__.renderConfigObj;
+	// DomObj.prototype.renderWithConfigObj = function(){
+	// 	console.log('renderWithConfigObj');
+	// 	var self = this,
+	// 		configObj = this.__internal__.renderConfigObj;
 
 
 
-		if(configObj.template){
-			console.log('configObj has template property');	
-		}
+	// 	if(configObj.template){
+	// 		console.log('configObj has template property');	
+	// 	}
 
-		if(configObj.foreach){
-			console.log('configObj has foreach property');
-			var foreachVal = configObj.foreach;
-			// test to see if foreach value is a liveVar or not.
-			if(foreachVal.asdfType === 'asdfArray'){
-				var val = foreachVal();
+	// 	if(configObj.foreach){
+	// 		console.log('configObj has foreach property');
+	// 		var foreachVal = configObj.foreach;
+	// 		// test to see if foreach value is a liveVar or not.
+	// 		if(foreachVal.asdfType === 'asdfArray'){
+	// 			var val = foreachVal();
 
-				val.forEach(function (v, i, arr){
-					console.log(v);
-					// console.log(configObj.template.domStringCompiled);
-					var domString = configObj.template.domStringCompiled(v);
-					// console.log(domString);
+	// 			val.forEach(function (v, i, arr){
+	// 				console.log(v);
+	// 				// console.log(configObj.template.domStringCompiled);
+	// 				var domString = configObj.template.domStringCompiled(v);
+	// 				// console.log(domString);
 
-					var tempFunc = self.appendChild.bind(self, domString);
+	// 				var tempFunc = self.appendChild.bind(self, domString);
 
-					ns.animUpdateArr.push(tempFunc);
-				});
-			}
-		}	
-	}
+	// 				ns.animUpdateArr.push(tempFunc);
+	// 			});
+	// 		}
+	// 	}	
+	// }
 	// An Array of Dom Objects, Used in handling of classes, and Id's.
 	function DomObjArray(data){
-		console.log('inside dom array');
-		console.dir(data);
-		var self = this;
-		var testObj = {};
+		// console.log('inside dom array');
+		// console.dir(data);
+		var self = this,
+			testObj = {};
 
 		this.__internal__ = {
 			DomObjArr: [new DomObj(data)]
 		};
 
-		console.time('secondTime');
+		// console.time('secondTime');
 		// add properties of the style names to the DomObjArray
 		this.__internal__.DomObjArr[0].__internal__.styleKeys.forEach(function (v, i, arr){
 			Object.defineProperty(self, v, {
 				get: function(){
-					console.log('get me!');
+					// console.log('get me!');
+					// return an object that has the dom nodes, and the values associated with
+					// the style prop that has been asked for.
 				},
 				set: function(val){
-					console.log('set me!', val);
+					console.log('set me!', val, v);
+					self.updateStyleProp(v, val);
 				}
 			})
 		})
 		// create properties on the main node for each style property.
 		
-		console.timeEnd('secondTime');
-
-		// console.time('thirdTime');
-		
-		// console.timeEnd('thirdTime');
+		// console.timeEnd('secondTime');
 	}
 	// set the prototype of the DomObjArray so that it can access array methods.
 	DomObjArray.prototype = new Array();
 
 	// a method created to be able to safely add a domNode to a DomObjArray
 	DomObjArray.prototype.pushDomNode = function(domNode){
-		console.log('reached pushDomNode');
+		// console.log('reached pushDomNode');
 		this.push(domNode);
 
-		this.__internal__.DomObjArr.push(domNode);
+		this.__internal__.DomObjArr.push(new DomObj(domNode));
+	}
 
+	DomObjArray.prototype.updateStyleProp = function(propName, val){
+		// console.log('updating: ', propName, val, this);
+
+		for(var i = 0, l = this.__internal__.DomObjArr.length; i<l;i++){
+			var domObj = this.__internal__.DomObjArr[i];
+				
+				if(propName !== 'length'){
+					domObj.updateStyle({
+						style: propName, 
+						value: val
+						}
+					);	
+				}
+		}
 	}
 
 	// Constructor for styles obj.
 	function DomStyleObj(styleName){
 		
 		this.styleName = styleName;
-	}
-	// adds style and val to queue of things to be updated on next animationFrame.
-	DomStyleObj.prototype.addStyleToUpdate = function(style, val){
-		
 	}
 
 	function getStyleName(styleName){
@@ -356,22 +355,6 @@ define([
 			ns.playgrounds.push(new Playground(node))
 		};
 	};
-
-	function animationFrameFunc(){
-		if(ns.animUpdateArr.length > 0){
-			console.log('render frame');
-			for(var i = 0; i < ns.animUpdateArr.length;i++){
-				// console.log(i);
-				var func = ns.animUpdateArr.pop();
-				// console.log(func);
-				func();
-
-			}	
-		}
-		animId = requestAnimationFrame(animationFrameFunc);
-	}
-
-	animId = requestAnimationFrame(animationFrameFunc);
 
 	function initDom(){
 		initAsdfPlaygrounds();
